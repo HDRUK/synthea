@@ -10,7 +10,10 @@
   "states": {
     "Initial": {
       "type": "Initial",
-      "direct_transition": "Adolescent_Idiopathic_Scoliosis",
+      "distributed_transition": [
+        { "transition": "Adolescent_Idiopathic_Scoliosis", "distribution": 0.03 },
+        { "transition": "Terminal", "distribution": 0.97 }
+      ],
       "name": "Initial"
     },
     "Terminal": {
@@ -23,10 +26,12 @@
         {
           "system": "SNOMED-CT",
           "code": "203646004",
-          "display": "AIS starts before detection",
-          "value_set": ""
+            "display": "Adolescent idiopathic scoliosis",
+            "value_set": ""
         }
       ],
+        "remarks": ["AIS starts before detection"],
+        "target_encounter": "Followup_Orthopaedic_Encounter",
       "direct_transition": "Age_Guard",
       "name": "Adolescent_Idiopathic_Scoliosis"
     },
@@ -49,8 +54,36 @@
           }
         ]
       },
-      "direct_transition": "Scoliosis_School_Screening",
+        "direct_transition": "Age_Delay",
       "name": "Age_Guard"
+    },
+    "Age_Delay": {
+      "type": "Delay",
+      "distribution": {
+        "kind": "UNIFORM",
+        "parameters": {
+          "high": 8,
+          "low": 0
+        }
+      },
+      "unit": "years",
+      "direct_transition": "Wellness_Encounter",
+      "name": "Age_Delay"
+    },
+    "Wellness_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "wellness",
+      "reason": "Adolescent_Idiopathic_Scoliosis",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "185349003",
+          "display": "Wellness encounter",
+          "value_set": ""
+        }
+      ],
+      "direct_transition": "Scoliosis_School_Screening",
+      "name": "Wellness_Encounter"
     },
     "Scoliosis_School_Screening": {
       "type": "Procedure",
@@ -58,7 +91,7 @@
         {
           "system": "SNOMED-CT",
           "code": "170245002",
-          "display": "Scoliosis screening",
+            "display": "Screening for scoliosis",
           "value_set": ""
         }
       ],
@@ -82,7 +115,7 @@
         {
           "system": "SNOMED-CT",
           "code": "271605009",
-          "display": "Look for asymmetry points",
+            "display": "Examination of posture and body alignment",
           "value_set": ""
         }
       ],
@@ -103,7 +136,7 @@
         {
           "system": "SNOMED-CT",
           "code": "308481009",
-          "display": "Referral_to_Orthopaedic_Surgeon",
+            "display": "Referral to orthopedic surgeon",
           "value_set": ""
         }
       ],
@@ -115,9 +148,14 @@
         }
       },
       "unit": "days",
-      "direct_transition": "Orthopaedic_Encounter",
+        "direct_transition": "End_Wellness_Encounter",
       "name": "Referral_to_Orthopaedic_Surgeon"
     },
+      "End_Wellness_Encounter": {
+        "type": "EncounterEnd",
+        "name": "End_Wellness_Encounter",
+        "direct_transition": "Orthopaedic_Encounter"
+      },
     "Orthopaedic_Encounter": {
       "type": "Encounter",
       "encounter_class": "ambulatory",
@@ -127,7 +165,7 @@
         {
           "system": "SNOMED-CT",
           "code": "185347001",
-          "display": "Orthopaedic_Encounter",
+            "display": "Orthopedic outpatient clinic",
           "value_set": ""
         }
       ],
@@ -140,7 +178,7 @@
         {
           "system": "SNOMED-CT",
           "code": "84100007",
-          "display": "History_Taking",
+            "display": "History taking",
           "value_set": ""
         }
       ],
@@ -162,7 +200,7 @@
         {
           "system": "SNOMED-CT",
           "code": "417656005",
-          "display": "Postural_Examination",
+            "display": "Posture examination",
           "value_set": ""
         }
       ],
@@ -184,7 +222,7 @@
         {
           "system": "SNOMED-CT",
           "code": "5880005",
-          "display": "Physical_Examination",
+            "display": "Physical examination",
           "value_set": ""
         }
       ],
@@ -211,7 +249,7 @@
         {
           "system": "SNOMED-CT",
           "code": "183830008",
-          "display": "Referral_for_X-ray",
+            "display": "Referral for X-ray",
           "value_set": ""
         }
       ],
@@ -233,7 +271,7 @@
         {
           "system": "SNOMED-CT",
           "code": "1290953004",
-          "display": "Plain_X-Ray_Spine_and_Pelvis",
+            "display": "Plain X-ray of spine and pelvis",
           "value_set": ""
         }
       ],
@@ -245,14 +283,29 @@
         }
       },
       "unit": "minutes",
-      "direct_transition": "Post_XRay_Delay",
+      "direct_transition": "End_XRay_Encounter",
       "name": "Plain_X-Ray_Spine_and_Pelvis",
       "reason": "Adolescent_Idiopathic_Scoliosis"
     },
     "End_Orthopaedic_Encounter": {
       "type": "EncounterEnd",
-      "direct_transition": "XRay_Delay",
+      "direct_transition": "XRay_Encounter",
       "name": "End_Orthopaedic_Encounter"
+    },
+    "XRay_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "outpatient",
+      "reason": "Adolescent_Idiopathic_Scoliosis",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "50849002",
+          "display": "Radiology encounter",
+          "value_set": ""
+        }
+      ],
+      "direct_transition": "XRay_Delay",
+      "name": "XRay_Encounter"
     },
     "XRay_Delay": {
       "type": "Delay",
@@ -266,6 +319,11 @@
       "unit": "days",
       "direct_transition": "Plain_X-Ray_Spine_and_Pelvis",
       "name": "XRay_Delay"
+    },
+    "End_XRay_Encounter": {
+      "type": "EncounterEnd",
+      "name": "End_XRay_Encounter",
+      "direct_transition": "Post_XRay_Delay"
     },
     "Post_XRay_Delay": {
       "type": "Delay",
@@ -289,7 +347,7 @@
         {
           "system": "SNOMED-CT",
           "code": "390906007",
-          "display": "Followup_Orthopaedic_Encounter",
+            "display": "Follow-up orthopedic encounter",
           "value_set": ""
         }
       ],
@@ -1374,6 +1432,26 @@
       "unit": "minutes",
       "name": "Refer_to_Spinal_Surgery",
       "reason": "Adolescent_Idiopathic_Scoliosis",
+      "direct_transition": "Spinal_Surgery_Encounter"
+    },
+    "Spinal_Surgery_Encounter": {
+      "type": "Encounter",
+      "encounter_class": "inpatient",
+      "reason": "Spinal surgery for AIS",
+      "codes": [
+        {
+          "system": "SNOMED-CT",
+          "code": "183452005",
+          "display": "Spinal surgery encounter",
+          "value_set": ""
+        }
+      ],
+      "direct_transition": "End_Spinal_Surgery_Encounter",
+      "name": "Spinal_Surgery_Encounter"
+    },
+    "End_Spinal_Surgery_Encounter": {
+      "type": "EncounterEnd",
+      "name": "End_Spinal_Surgery_Encounter",
       "direct_transition": "End_Followup_Encounter"
     },
     "Clinical_Decision_Based_on_SOSORT_2016_Guidelines_11": {
